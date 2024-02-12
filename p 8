@@ -1,0 +1,17 @@
+from scipy.optimize import minimize
+
+def objective_function(x):
+    return x[0]**2 + x[1]**2
+
+def constraint_function(x):
+    return x[0] + x[1] - 1
+
+x0 = [0, 0]
+
+bounds = ((None, None), (None, None))  
+constraint = {'type': 'eq', 'fun': constraint_function}
+
+result = minimize(objective_function, x0, method='SLSQP', bounds=bounds, constraints=constraint)
+
+print("Optimal solution:", result.x)
+print("Optimal objective value:", result.fun)

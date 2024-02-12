@@ -1,0 +1,59 @@
+import nltk
+nltk.download('stopwords')
+
+from gensim.models import Word2Vec
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import CountVectorizer
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+import numpy as np
+
+# Example documents
+doc1 = "The quick brown fox jumps over the lazy dog"
+doc2 = "A quick brown dog jumps on the log"
+doc3 = "The lazy cat sleeps on the mat"
+
+# Tokenize documents
+tokens1 = word_tokenize(doc1.lower())
+tokens2 = word_tokenize(doc2.lower())
+tokens3 = word_tokenize(doc3.lower())
+
+# Remove stop words
+stop_words = set(stopwords.words('english'))
+tokens1 = [word for word in tokens1 if word not in stop_words]
+tokens2 = [word for word in tokens2 if word not in stop_words]
+tokens3 = [word for word in tokens3 if word not in stop_words]
+
+# Train Word2Vec model
+sentences = [tokens1, tokens2, tokens3]
+model = Word2Vec(sentences, min_count=1)
+
+# Get word embeddings
+word_embeddings = model.wv
+
+# Compute cosine similarity between document embeddings
+doc1_embedding = np.mean([word_embeddings[word] for word in tokens1], axis=0)
+doc2_embedding = np.mean([word_embeddings[word] for word in tokens2], axis=0)
+doc3_embedding = np.mean([word_embeddings[word] for word in tokens3], axis=0)
+
+cosine_sim_doc1_doc2 = cosine_similarity([doc1_embedding], [doc2_embedding])[0][0]
+cosine_sim_doc1_doc3 = cosine_similarity([doc1_embedding], [doc3_embedding])[0][0]
+cosine_sim_doc2_doc3 = cosine_similarity([doc2_embedding], [doc3_embedding])[0][0]
+
+print("Cosine Similarity between doc1 and doc2:", cosine_sim_doc1_doc2)
+print("Cosine Similarity between doc1 and doc3:", cosine_sim_doc1_doc3)
+print("Cosine Similarity between doc2 and doc3:", cosine_sim_doc2_doc3)
+
+# Compute Jaccard similarity between documents
+def jaccard_similarity(doc1_tokens, doc2_tokens):
+    intersection = len(set(doc1_tokens).intersection(set(doc2_tokens)))
+    union = len(set(doc1_tokens).union(set(doc2_tokens)))
+    return intersection / union
+
+jaccard_sim_doc1_doc2 = jaccard_similarity(tokens1, tokens2)
+jaccard_sim_doc1_doc3 = jaccard_similarity(tokens1, tokens3)
+jaccard_sim_doc2_doc3 = jaccard_similarity(tokens2, tokens3)
+
+print("Jaccard Similarity between doc1 and doc2:", jaccard_sim_doc1_doc2)
+print("Jaccard Similarity between doc1 and doc3:", jaccard_sim_doc1_doc3)
+print("Jaccard Similarity between doc2 and doc3:", jaccard_sim_doc2_doc3)
